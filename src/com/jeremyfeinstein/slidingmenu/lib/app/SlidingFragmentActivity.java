@@ -1,16 +1,22 @@
 package com.jeremyfeinstein.slidingmenu.lib.app;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewCompat;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 public class SlidingFragmentActivity extends FragmentActivity implements SlidingActivityBase {
 
 	private SlidingActivityHelper mHelper;
+	private int statusBarColor;
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -53,9 +59,24 @@ public class SlidingFragmentActivity extends FragmentActivity implements Sliding
 
 	/* (non-Javadoc)
 	 * @see android.app.Activity#setContentView(int)
-	 */
+	 */@SuppressLint("NewApi") 
 	@Override
 	public void setContentView(int id) {
+		Window window =  getWindow();  
+		//取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏  
+		window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);   
+		  
+		//需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色  
+		window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);   
+		//设置状态栏颜色  
+		window.setStatusBarColor(statusBarColor);  
+		  
+		ViewGroup mContentView = (ViewGroup)  findViewById(Window.ID_ANDROID_CONTENT);  
+		View mChildView = mContentView.getChildAt(0);  
+		if (mChildView != null) {  
+		    //注意不是设置 ContentView 的 FitsSystemWindows, 而是设置 ContentView 的第一个子 View . 预留出系统 View 的空间.  
+		    ViewCompat.setFitsSystemWindows(mChildView, true);  
+		}  
 		setContentView(getLayoutInflater().inflate(id, null));
 	}
 
@@ -147,6 +168,14 @@ public class SlidingFragmentActivity extends FragmentActivity implements Sliding
 		boolean b = mHelper.onKeyUp(keyCode, event);
 		if (b) return b;
 		return super.onKeyUp(keyCode, event);
+	}
+
+	public int getStatusBarColor() {
+		return statusBarColor;
+	}
+
+	public void setStatusBarColor(int statusBarColor) {
+		this.statusBarColor = statusBarColor;
 	}
 
 }
